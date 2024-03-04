@@ -5,22 +5,30 @@ const ViewReport = ({ db }) => {
     const [month, setMonth] = useState('');
     const [year, setYear] = useState('');
     const [report, setReport] = useState([]);
+    const [categoryCounter, setCategoryCounter] = useState({});
 
     const handleViewReport = async (e) => {
         e.preventDefault();
         try {
-            // Reset the report state before fetching new data
             setReport([]);
+            setCategoryCounter({});
 
             const costs = await idb.getCostsByMonthAndYear(month, year);
-            setReport(costs || []); // Initialize with an empty array if costs is null/undefined
+            setReport(costs || []);
             console.log("Fetch report");
+
+            const updatedCategoryCounter = costs.reduce((acc, cost) => {
+                const category = cost.category;
+                acc[category] = (acc[category] || 0) + 1;
+                return acc;
+            }, {});
+            setCategoryCounter(updatedCategoryCounter);
 
         } catch (error) {
             console.error("Failed to fetch report", error);
-
         }
     };
+
     return (
         <div>
             <form onSubmit={handleViewReport}>
@@ -28,13 +36,42 @@ const ViewReport = ({ db }) => {
                 <input type="number" value={year} onChange={(e) => setYear(e.target.value)} placeholder="Year" min="1970" max="2100" required />
                 <button type="submit">View Report</button>
             </form>
-            <ul>
-                {report.map((cost, index) => (
-                    <li key={index}>
-                        Sum: {cost.sum}, Category: {cost.category}, Description: {cost.description}, Date: {cost.day}-{cost.month}-{cost.year}
-                    </li>
+            <table className="report-table">
+                <thead>
+                <tr>
+                    <th>Counter</th>
+                    <th>Category</th>
+                    <th>Sum</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                {Object.entries(categoryCounter).map(([category, counter]) => (
+                    <React.Fragment key={category}>
+                        {[...Array(counter)].map((_, index) => {
+                            // Filter the report for the current category
+                            const categoryReports = report.filter((cost) => cost.category === category);
+                            const cost = categoryReports[index];
+
+                            return (
+                                <tr key={`${category}-${index}`}>
+                                    <td>{index + 1}</td>
+                                    <td>{category}</td>
+                                    {cost && (
+                                        <React.Fragment key={cost.id}>
+                                            <td>{cost.sum}</td>
+                                            <td>{cost.description}</td>
+                                            <td>{`${cost.day}-${cost.month}-${cost.year}`}</td>
+                                        </React.Fragment>
+                                    )}
+                                </tr>
+                            );
+                        })}
+                    </React.Fragment>
                 ))}
-            </ul>
+                </tbody>
+            </table>
         </div>
     );
 };
