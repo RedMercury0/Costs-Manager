@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import idb from "./idb-module.js";
+import { TextField, Button, Table, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
 
 const ViewReport = ({ db }) => {
     const [month, setMonth] = useState('');
@@ -15,7 +16,6 @@ const ViewReport = ({ db }) => {
 
             const costs = await idb.getCostsByMonthAndYear(month, year);
             setReport(costs || []);
-            console.log("Fetch report");
 
             const updatedCategoryCounter = costs.reduce((acc, cost) => {
                 const category = cost.category;
@@ -30,50 +30,68 @@ const ViewReport = ({ db }) => {
     };
 
     return (
-        <div>
+        <div style={{maxWidth: '700px', margin: 'auto', marginTop: '30px'}}>
             <form onSubmit={handleViewReport}>
-                <input type="number" value={month} onChange={(e) => setMonth(e.target.value)} placeholder="Month" min="1" max="12" required />
-                <input type="number" value={year} onChange={(e) => setYear(e.target.value)} placeholder="Year" min="1970" max="2100" required />
-                <button type="submit">View Report</button>
+                <div style={{display: 'flex', gap: '10px', marginBottom: '40px'}}>
+                    <TextField
+                        type="number"
+                        value={month}
+                        onChange={(e) => setMonth(e.target.value)}
+                        label="Month"
+                        placeholder="Month"
+                        inputProps={{min: 1, max: 12}}
+                        style={{backgroundColor: 'white', width: '150px'}}
+                    />
+                    <TextField
+                        type="number"
+                        value={year}
+                        onChange={(e) => setYear(e.target.value)}
+                        label="Year"
+                        placeholder="Year"
+                        inputProps={{min: 1970, max: 2100}}
+                        style={{backgroundColor: 'white', width: '150px'}}
+                    />
+                    <Button type="submit" variant="contained" style={{ marginLeft: '10px', backgroundColor: 'black', color: 'white' }}>
+                        View Report
+                    </Button>
+                </div>
             </form>
-            <table className="report-table">
-                <thead>
-                <tr>
-                    <th>Counter</th>
-                    <th>Category</th>
-                    <th>Sum</th>
-                    <th>Description</th>
-                    <th>Date</th>
-                </tr>
-                </thead>
-                <tbody>
-                {Object.entries(categoryCounter).map(([category, counter]) => (
-                    <React.Fragment key={category}>
-                        {[...Array(counter)].map((_, index) => {
-                            // Filter the report for the current category
-                            const categoryReports = report.filter((cost) => cost.category === category);
-                            const cost = categoryReports[index];
+            <Table className="report-table">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Counter</TableCell>
+                        <TableCell>Category</TableCell>
+                        <TableCell>Sum</TableCell>
+                        <TableCell>Description</TableCell>
+                        <TableCell>Date</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {Object.entries(categoryCounter).map(([category, counter]) => (
+                        <React.Fragment key={category}>
+                            {[...Array(counter)].map((_, index) => {
+                                const categoryReports = report.filter((cost) => cost.category === category);
+                                const cost = categoryReports[index];
 
-                            return (
-                                <tr key={`${category}-${index}`}>
-                                    <td>{index + 1}</td>
-                                    <td>{category}</td>
-                                    {cost && (
-                                        <React.Fragment key={cost.id}>
-                                            <td>{cost.sum}</td>
-                                            <td>{cost.description}</td>
-                                            <td>{`${cost.day}-${cost.month}-${cost.year}`}</td>
-                                        </React.Fragment>
-                                    )}
-                                </tr>
-                            );
-                        })}
-                    </React.Fragment>
-                ))}
-                </tbody>
-            </table>
+                                return (
+                                    <TableRow key={`${category}-${index}`}>
+                                        <TableCell>{index + 1}</TableCell>
+                                        <TableCell>{category}</TableCell>
+                                        {cost && (
+                                            <React.Fragment key={cost.id}>
+                                                <TableCell>{cost.sum}</TableCell>
+                                                <TableCell>{cost.description}</TableCell>
+                                                <TableCell>{`${cost.day}-${cost.month}-${cost.year}`}</TableCell>
+                                            </React.Fragment>
+                                        )}
+                                    </TableRow>
+                                );
+                            })}
+                        </React.Fragment>
+                    ))}
+                </TableBody>
+            </Table>
         </div>
     );
 };
-
 export default ViewReport;
