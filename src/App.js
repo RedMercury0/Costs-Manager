@@ -30,10 +30,13 @@ const App = () => {
             paddingTop: '10vh',
         }}>
             <h1 style={{fontSize: '2rem', fontWeight: 'bold', marginBottom: '10px'}}>Costs Manager</h1>
-            <>
+            <div style={{
+                width: '700px',
+                maxHeight: '80vh',
+            }}>
                 <AddCostItem db={db}/>
                 <ViewReport db={db}/>
-            </>
+            </div>
         </div>
     );
 };
