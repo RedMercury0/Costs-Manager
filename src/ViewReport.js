@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import idb from './idb-module.js';
 import { Button, Input } from 'antd';
 
 const ViewReport = ({ db }) => {

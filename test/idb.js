@@ -75,12 +75,12 @@ const idb = {
     },
 
     getCostsByMonthAndYear: async (month, year) => {
-        // Check if month and year are provided and valid
+        // Check if the month and year are provided and if they are valid
         if (!month || isNaN(month) || !year || isNaN(year)) {
             throw new Error("Invalid month or year");
         }
 
-        // Check if the requested month and year have records
+        // Check if there are records for the month and year specified
         const db = await idb.openCostsDB("costsdb", 1);
         return new Promise((resolve, reject) => {
             const transaction = db.db.transaction(['costs'], 'readonly');
@@ -90,7 +90,11 @@ const idb = {
             request.onsuccess = () => {
                 const allCosts = request.result;
                 const filteredCosts = allCosts.filter(cost => parseInt(cost.year) === parseInt(year) && parseInt(cost.month) === parseInt(month));
-                resolve(filteredCosts);
+                if (filteredCosts.length === 0) {
+                    reject("No records exists for the specified date");
+                } else {
+                    resolve(filteredCosts);
+                }
             };
 
             request.onerror = () => {
@@ -98,6 +102,7 @@ const idb = {
             };
         });
     }
+
 };
 
 // Expose idb globally
