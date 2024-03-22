@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Input } from 'antd';
 
 const ViewReport = ({ db }) => {
+    // State variables declaration
     const [month, setMonth] = useState('');
     const [year, setYear] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -10,10 +11,12 @@ const ViewReport = ({ db }) => {
     const [loading, setLoading] = useState(false);
     const [totalPages, setTotalPages] = useState(1);
 
+    // useEffect hook to calculate total pages when report changes
     useEffect(() => {
         calculateTotalPages();
-    }, [report]);
+    });
 
+    // Calculating the total pages then set the total pages in state
     const calculateTotalPages = () => {
         const pages = Math.ceil(report.length / rowsPerPage);
         setTotalPages(pages);
@@ -23,11 +26,15 @@ const ViewReport = ({ db }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            setReport([]);
-
+            setReport([]); // Clear previous report data
             const costs = await db.getCostsByMonthAndYear(month, year);
-            setReport(costs || []);
-
+            // Sort costs by date in descending order
+            const sortedCosts = costs.sort((a, b) => {
+                const dateA = new Date(a.year, a.month - 1, a.day);
+                const dateB = new Date(b.year, b.month - 1, b.day);
+                return dateB - dateA;
+            });
+            setReport(sortedCosts);
             setLoading(false);
         } catch (error) {
             console.error("Failed to fetch report", error);
@@ -36,10 +43,11 @@ const ViewReport = ({ db }) => {
         }
     };
 
+
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
-
+    // Setting indexes for last/first rows and slice report data for the current page
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = report.slice(indexOfFirstRow, indexOfLastRow);
@@ -71,13 +79,22 @@ const ViewReport = ({ db }) => {
                 <>
                     {report.length > 0 ? (
                         <>
+                            {totalPages > 1 && (
+                                <div style={{textAlign: 'center', marginTop: '20px' }}>
+                                    {Array.from({ length: totalPages }, (_, index) => (
+                                        <button key={index + 1} onClick={() => handlePageChange(index + 1)} style={{ margin: '0 5px', padding: '5px 10px', backgroundColor: currentPage === index + 1 ? 'black' : 'grey', color: 'white', border: 'none', cursor: 'pointer' }}>
+                                            {index + 1}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                             <table className="report-table" style={{width: '100%', borderCollapse: 'collapse'}}>
                                 <thead>
                                 <tr>
-                                    <th>Category</th>
-                                    <th>Sum</th>
-                                    <th>Description</th>
-                                    <th>Date</th>
+                                    <th style={{width: '25%'}}>Category</th>
+                                    <th style={{width: '25%'}}>Sum</th>
+                                    <th style={{width: '30%'}}>Description</th>
+                                    <th style={{width: '20%'}}>Date</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -91,15 +108,7 @@ const ViewReport = ({ db }) => {
                                 ))}
                                 </tbody>
                             </table>
-                            {totalPages > 1 && (
-                                <div style={{textAlign: 'center', marginTop: '20px' }}>
-                                    {Array.from({ length: totalPages }, (_, index) => (
-                                        <button key={index + 1} onClick={() => handlePageChange(index + 1)} style={{ margin: '0 5px', padding: '5px 10px', backgroundColor: currentPage === index + 1 ? 'black' : 'grey', color: 'white', border: 'none', cursor: 'pointer' }}>
-                                            {index + 1}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
+
                         </>
                     ) : null}
                 </>

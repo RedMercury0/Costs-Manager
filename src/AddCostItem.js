@@ -4,6 +4,7 @@ import { Input, Button, Select } from 'antd';
 const { Option } = Select;
 
 const AddCostItem = ({ db }) => {
+    // State variables declaration
     const [sum, setSum] = useState('');
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
@@ -11,6 +12,7 @@ const AddCostItem = ({ db }) => {
     const [month, setMonth] = useState('');
     const [year, setYear] = useState('');
 
+    // Attempt to add new cost record, then clear the selections
     const handleSubmit = async (e) => {
         e.preventDefault();
         const cost = {

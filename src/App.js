@@ -5,20 +5,22 @@ import ViewReport from './ViewReport.js';
 import './App.css';
 
 const App = () => {
+    // State variable to hold the database object
     const [db, setDb] = useState(null);
 
     useEffect(() => {
         const initializeDB = async () => {
             try {
+                // Open the IndexedDB costsdb database
                 const costDb = await idb.openCostsDB("costsdb", 1);
-                setDb(costDb);
+                setDb(costDb); // Set the database object in state
             } catch (error) {
                 console.error("Failed to open database", error);
             }
         };
 
         initializeDB();
-    }, []);
+    }, []); // The empty dependency array ensures that the database initialized only once
 
     return (
         <div style={{
@@ -34,7 +36,9 @@ const App = () => {
                 width: '700px',
                 maxHeight: '80vh',
             }}>
+                {/* Render the AddCostItem component and pass the database object as prop */}
                 <AddCostItem db={db}/>
+                {/* Render the ViewReport component and pass the database object as prop */}
                 <ViewReport db={db}/>
             </div>
         </div>

@@ -53,8 +53,6 @@ const idb_module = {
             }
 
 
-
-
             const requestAdd = objectStore.add({
                 sum,
                 category,
